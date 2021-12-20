@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\News;
 use App\Models\Social;
+use App\Models\Image;
 use App\Models\TagsNews;
 use App\Helpers\Utilities;
 use Illuminate\Http\Request;
@@ -336,7 +337,7 @@ class NewsController extends Controller
     //get news by Id
     public function show(Request $request, $id)
     {
-        $relations = ['comment', 'tags', 'user', 'department'];
+        $relations = ['comment', 'tags', 'user', 'department','images'];
         $lang = $request->header('Accept-Language');
         // if(!in_array($lang, ['en', 'ar']) && $lang != null){
         //    $lang = 'ar';
@@ -345,6 +346,8 @@ class NewsController extends Controller
        //Processing
        $news = News::where('id', $id)->firstOrFail();
        $response = $this->NewsRepository->getByIdNews($id, $relations);
+      //  return response()->json($response);
+
        if($lang == 'en'){
         $dataItem =  $response->map(function($item){
             $data['id'] = $item->id;
@@ -361,16 +364,16 @@ class NewsController extends Controller
             $data['is_slider'] = $item->is_slider;
             $data['tags'] = $item->tags;
             if(!is_null($item->user)){
-                $data['user'] = [
-                'id' => $item->user->id,
-                'full_name'=> $item->user->full_name,
-                'email'=> $item->user->email,
-                'phone'=> $item->user->phone,
-                'image'=> $item->user->image,
-                ];
-            }else{
-                $data['user']=[];
-            }
+              $data['user'] = [
+              'id' => $item->user->id,
+              'full_name'=> $item->user->full_name,
+              'email'=> $item->user->email,
+              'phone'=> $item->user->phone,
+              'image'=> $item->user->image,
+              ];
+          }else{
+              $data['user']=[];
+          }
             if(!empty($item->department)){
               $data['department'] = [
                 'id' => $item->department->id,
@@ -400,6 +403,7 @@ class NewsController extends Controller
             $data['comment'] = $item->comment;
             $data['is_slider'] = $item->is_slider;
             $data['tags'] = $item->tags;
+            $data['images'] = $item->images;
             if(!is_null($item->user)){
             $data['user'] = [
                 'id' => $item->user->id,
@@ -448,7 +452,10 @@ class NewsController extends Controller
         $tags = $request->validate([
             "tags"    => "nullable|array",
         ]);
-
+        $images = $request->validate([
+          "images"    => "nullable|array",
+        ]);
+        $extension =['png','jepg','jpg'];
         //Processing
         $news['user_id'] = auth()->user()->id;
         if($request->hasFile('image')){//check file
@@ -475,7 +482,28 @@ class NewsController extends Controller
                 TagsNews::create($tagNews);
             }
         }
+        if (!empty($images['images'][0])) {
+          foreach($request->file('images') as $key=>$file)// check extention before create in database
+            {
+                $name=$file->getClientOriginalName();
+                $ext = pathinfo($name, PATHINFO_EXTENSION); 
+                if(!in_array($ext, $extension)){
+                    return Utilities::wrap(['error' => 'Invalid Extension'], 400);
+                }
+            }
 
+           foreach($request->file('images') as $key=>$file)
+            {
+                $name=$file->getClientOriginalName();
+                $ext = pathinfo($name, PATHINFO_EXTENSION); 
+                $fileName = pathinfo($name,PATHINFO_FILENAME);
+                $path = $file->store('news');
+                $image = new Image();
+                $image->link = $path; 
+                $image->news_id= $response['id']; 
+                $image->save();
+            }
+      }
         //Response
         return Utilities::wrap($response, 200);
     }

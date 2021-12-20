@@ -47,4 +47,9 @@ class News extends Model
 	{
 		return $this->belongsTo(SinceDepartment::class,'department_id')->where('is_deleted', 0);
     }
+    //images
+	public function images()
+	{
+		return $this->hasMany(Image::class, 'news_id')->where('is_deleted', 0);
+    }
 }
