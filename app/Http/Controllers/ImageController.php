@@ -38,7 +38,6 @@ class ImageController extends Controller
         
         //Processing
         $response = $this->ImageRepository->getLisData($skip, $take, $relations, $filter);
-        return response()->json($response);
         if($lang == 'en'){
             $dataItem =  $response['items']->map(function($item){
                 $data['id'] = $item->id;

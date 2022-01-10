@@ -363,6 +363,7 @@ class NewsController extends Controller
             $data['comment'] = $item->comment;
             $data['is_slider'] = $item->is_slider;
             $data['tags'] = $item->tags;
+            $data['images'] = $item->images;
             if(!is_null($item->user)){
               $data['user'] = [
               'id' => $item->user->id,
@@ -438,6 +439,8 @@ class NewsController extends Controller
     //add news
     public function store(Request $request)
     {
+        // return response()->json($request->file('images'));
+
         //validations 
         $news = $request->validate([
             'ar_title' => 'required|string',
@@ -455,8 +458,9 @@ class NewsController extends Controller
         $images = $request->validate([
           "images"    => "nullable|array",
         ]);
-        $extension =['png','jepg','jpg'];
+        $extension =['png','jpeg','jpg'];
         //Processing
+        // return response()->json($request);
         $news['user_id'] = auth()->user()->id;
         if($request->hasFile('image')){//check file
             $request->validate([
@@ -482,7 +486,7 @@ class NewsController extends Controller
                 TagsNews::create($tagNews);
             }
         }
-        if (!empty($images['images'][0])) {
+        if ((!empty($images))) {
           foreach($request->file('images') as $key=>$file)// check extention before create in database
             {
                 $name=$file->getClientOriginalName();
@@ -523,7 +527,10 @@ class NewsController extends Controller
             'department_id' => 'integer|exists:since_departments,id',
             'image' => 'file|mimes:jpeg,bmp,png,jpg',
         ]);
-        
+        $images = $request->validate([
+          "images"    => "nullable|array",
+        ]);
+        $extension =['png','jpeg','jpg'];
         //Processing
         $news['user_id'] = auth()->user()->id;
         if($request->hasFile('image')){//check file
@@ -534,6 +541,29 @@ class NewsController extends Controller
             $new_name = $fileName->store('newsPoster');
             $news['image'] = $new_name;
         }
+        
+        if ((!empty($images))) {
+          foreach($request->file('images') as $key=>$file)// check extention before create in database
+            {
+                $name=$file->getClientOriginalName();
+                $ext = pathinfo($name, PATHINFO_EXTENSION); 
+                if(!in_array($ext, $extension)){
+                    return Utilities::wrap(['error' => 'Invalid Extension'], 400);
+                }
+            }
+
+           foreach($request->file('images') as $key=>$file)
+            {
+                $name=$file->getClientOriginalName();
+                $ext = pathinfo($name, PATHINFO_EXTENSION); 
+                $fileName = pathinfo($name,PATHINFO_FILENAME);
+                $path = $file->store('news');
+                $image = new Image();
+                $image->link = $path; 
+                $image->news_id= $id; 
+                $image->save();
+            }
+      }
         $response = $this->NewsRepository->update($id, $news);
 
         //Response
