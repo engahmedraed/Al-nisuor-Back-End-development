@@ -62,6 +62,8 @@ Route::get('students/researches/clint','ResearchSetudentsController@index');
 Route::get('agreements/clint','Collage_agreementsController@index');
 Route::get('agreements/clint/{id}','Collage_agreementsController@show');
 Route::get('students/researches/clint/{id}','ResearchSetudentsController@show');
+Route::get('researches/sustainablity/clint','ResearchController@showBySus');
+Route::get('course/sustainablity/clint','CourseController@showBySus');
 // Route::post('excel','StagesController@excel');
 
 Route::group(['middleware' => ['auth']], function () {

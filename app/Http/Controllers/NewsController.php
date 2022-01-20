@@ -449,7 +449,6 @@ class NewsController extends Controller
             'en_title' => 'required|string',
             'en_sub_description' => 'string',
             'en_description' => 'string',
-            'department_id' => 'integer|exists:since_departments,id',
             'image' => 'required|file|mimes:jpeg,bmp,png,jpg',
         ]);
         $tags = $request->validate([

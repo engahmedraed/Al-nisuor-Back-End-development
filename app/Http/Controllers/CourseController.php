@@ -28,7 +28,7 @@ class CourseController extends Controller
 
         //parameters
         $relations = [];
-        $filter = ['ar_name','ar_description','en_name','en_description','price'];
+        $filter = ['ar_name','ar_description','en_name','en_description','price','is_sustainabilty'];
         $take = $request->take;
         $skip = ($request->skip == null)? 0:$request->skip * $take;
         $lang = $request->header('Accept-Language');
@@ -46,6 +46,7 @@ class CourseController extends Controller
                 $data['image'] = $item->image;
                 $data['description'] = $item->en_description;
                 $data['status'] = $item->status;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
                 $data['created_at'] = $item->created_at;
                 $data['updated_at'] = $item->updated_at;
                 
@@ -59,7 +60,63 @@ class CourseController extends Controller
                   $data['price'] = $item->price;
                   $data['image'] = $item->image;
                   $data['description'] = $item->ar_description;
-                  $data['status'] = $item->status;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
+                $data['status'] = $item->status;
+                  $data['created_at'] = $item->created_at;
+                  $data['updated_at'] = $item->updated_at;
+                  
+                  return $data;
+            });
+            return Utilities::wrap(['totalCount' => $response['totalCount'], 'items' => $dataItem ], 200);
+        }
+        return Utilities::wrap($response, 200);
+    }
+
+    //all Course data
+    public function showBySus(Request $request)
+    {
+       //validations
+       $request->validate([
+           'skip' => 'Integer',
+           'take' => 'required|Integer'
+       ]);
+
+        //parameters
+        $relations = [];
+        $filter = ['ar_name','ar_description','en_name','en_description','price','is_sustainabilty'];
+        $take = $request->take;
+        $skip = ($request->skip == null)? 0:$request->skip * $take;
+        $lang = $request->header('Accept-Language');
+        // if(!in_array($lang, ['en', 'ar']) && $lang != null){
+        //    $lang = 'ar';
+        // }
+        
+        //Processing
+        $response = $this->CourseRepository->showBySus($skip, $take, $relations, $filter);
+        if($lang == 'en'){
+            $dataItem =  $response['items']->map(function($item){
+                $data['id'] = $item->id;
+                $data['name'] = $item->en_name;
+                $data['price'] = $item->price;
+                $data['image'] = $item->image;
+                $data['description'] = $item->en_description;
+                $data['status'] = $item->status;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
+                $data['created_at'] = $item->created_at;
+                $data['updated_at'] = $item->updated_at;
+                
+                return $data;
+          });
+          return Utilities::wrap(['totalCount' => $response['totalCount'], 'items' => $dataItem ], 200);
+        }elseif($lang == 'ar'){
+            $dataItem =  $response['items']->map(function($item){
+                  $data['id'] = $item->id;
+                  $data['name'] = $item->ar_name;
+                  $data['price'] = $item->price;
+                  $data['image'] = $item->image;
+                  $data['description'] = $item->ar_description;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
+                $data['status'] = $item->status;
                   $data['created_at'] = $item->created_at;
                   $data['updated_at'] = $item->updated_at;
                   
@@ -127,6 +184,7 @@ class CourseController extends Controller
             'en_description' => 'required|string',
             'image' => 'required|file|mimes:jpeg,bmp,png,jpg',
             'price' => 'required|string',
+            'is_sustainabilty' => 'integer|in:0,1'
         ]);
 
         //Processing

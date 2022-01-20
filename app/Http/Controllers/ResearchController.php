@@ -28,7 +28,7 @@ class ResearchController extends Controller
 
         //parameters
         $relations = ['teacher'];
-        $filter = ['ar_title','en_title','magazine', 'teacher_id', 'teacher.department_id'];
+        $filter = ['ar_title','en_title','magazine', 'teacher_id', 'teacher.department_id','is_sustainabilty'];
         $take = $request->take;
         $skip = ($request->skip == null)? 0:$request->skip * $take;
         $lang = $request->header('Accept-Language');
@@ -46,6 +46,7 @@ class ResearchController extends Controller
                 $data['link'] = $item->link;
                 $data['publish_date'] = $item->publish_date;
                 $data['teacher_id'] = $item->teacher_id;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
                 $data['created_at'] = $item->created_at;
                 $data['updated_at'] = $item->updated_at;
                 if(!empty($item->teacher)){
@@ -85,6 +86,7 @@ class ResearchController extends Controller
                 $data['link'] = $item->link;
                 $data['publish_date'] = $item->publish_date;
                 $data['teacher_id'] = $item->teacher_id;
+                $data['is_sustainabilty'] = $item->is_sustainabilty;
                 $data['created_at'] = $item->created_at;
                 $data['updated_at'] = $item->updated_at;
                 if(!empty($item->teacher)){
@@ -118,6 +120,110 @@ class ResearchController extends Controller
             return Utilities::wrap(['totalCount' => $response['totalCount'], 'items' => $dataItem ], 200);
         }
         //Response
+        return Utilities::wrap($response, 200);
+    }
+    public function showBySus(Request $request)
+    {
+       //validations
+       $request->validate([
+           'skip' => 'Integer',
+           'take' => 'required|Integer'
+       ]);
+
+        //parameters
+        $relations = ['teacher'];
+        $filter = ['ar_title','en_title','magazine', 'teacher_id', 'teacher.department_id'];
+        $take = $request->take;
+        $skip = ($request->skip == null)? 0:$request->skip * $take;
+        $lang = $request->header('Accept-Language');
+        // if(!in_array($lang, ['en', 'ar']) && $lang != null){
+        //    $lang = 'ar';
+        // }
+        
+        //Processing
+        // $response = Research::paginate($take);
+        $response = $this->ResearchRepository->showBySus($skip, $take, $relations, $filter);
+        if($lang == 'en'){
+          $dataItem =  $response['items']->map(function($item){
+              $data['id'] = $item->id;
+              $data['title'] = $item->en_title;
+              $data['magazine'] = $item->magazine;
+              $data['link'] = $item->link;
+              $data['publish_date'] = $item->publish_date;
+              $data['teacher_id'] = $item->teacher_id;
+              $data['created_at'] = $item->created_at;
+              $data['updated_at'] = $item->updated_at;
+              if(!empty($item->teacher)){
+                $data['teacher'] = [
+                      'id' => $item->teacher->id,
+                      'name'=> $item->teacher->en_name,
+                      'description'=> $item->teacher->en_description,
+                      'email'=> $item->teacher->email,
+                      'image'=> $item->teacher->image,
+                      'graduation_degree'=> $item->teacher->en_graduation_degree,
+                      'general_specialty'=> $item->teacher->en_general_specialty,
+                      'accurate_specialty'=> $item->teacher->en_accurate_specialty,
+                      'file_cv'=> $item->teacher->file_cv,
+                      'department_id'=> $item->teacher->department_id,
+                  ];
+              }else{
+                $data['teacher']=[];
+              }
+              if(!is_null($item->teacher->depatrment)){
+                $data['department'] = [
+                      'id' => $item->teacher->depatrment->id,
+                      'name'=> $item->teacher->depatrment->en_name,
+                      'link'=> $item->teacher->depatrment->link,
+                      'logo'=> $item->teacher->depatrment->logo,
+                  ];
+              }else{
+                $data['department']=[];
+              }
+              return $data;
+        });
+        return Utilities::wrap(['totalCount' => $response['totalCount'], 'items' => $dataItem ], 200);
+      }elseif($lang == 'ar'){
+          $dataItem =  $response['items']->map(function($item){
+              $data['id'] = $item->id;
+              $data['title'] = $item->ar_title;
+              $data['magazine'] = $item->magazine;
+              $data['link'] = $item->link;
+              $data['publish_date'] = $item->publish_date;
+              $data['teacher_id'] = $item->teacher_id;
+              $data['created_at'] = $item->created_at;
+              $data['updated_at'] = $item->updated_at;
+              if(!empty($item->teacher)){
+                $data['teacher'] = [
+                      'id' => $item->teacher->id,
+                      'name'=> $item->teacher->ar_name,
+                      'description'=> $item->teacher->ar_description,
+                      'email'=> $item->teacher->email,
+                      'image'=> $item->teacher->image,
+                      'graduation_degree'=> $item->teacher->ar_graduation_degree,
+                      'general_specialty'=> $item->teacher->ar_general_specialty,
+                      'accurate_specialty'=> $item->teacher->ar_accurate_specialty,
+                      'file_cv'=> $item->teacher->file_cv,
+                      'department_id'=> $item->teacher->department_id,
+                  ];
+              }else{
+                $data['teacher']=[];
+              }
+              if(!is_null($item->teacher->depatrment)){
+                $data['department'] = [
+                      'id' => $item->teacher->depatrment->id,
+                      'name'=> $item->teacher->depatrment->ar_name,
+                      'link'=> $item->teacher->depatrment->link,
+                      'logo'=> $item->teacher->depatrment->logo,
+                  ];
+              }else{
+                $data['department']=[];
+              }
+              return $data;
+          });
+          return Utilities::wrap(['totalCount' => $response['totalCount'], 'items' => $dataItem ], 200);
+      }
+        //Response
+        return response()->json($response);
         return Utilities::wrap($response, 200);
     }
      
@@ -226,8 +332,9 @@ class ResearchController extends Controller
             'link' => 'string',
             'publish_date' => 'string',
             'teacher_id' => 'required|integer|exists:teachers,id',
+            'is_sustainabilty'=> 'integer|in:0,1'
         ]);
-
+        // return response()->json($Research);
         //Processing
         $response = $this->ResearchRepository->create($Research);
 
@@ -246,6 +353,7 @@ class ResearchController extends Controller
             'link' => 'string',
             'publish_date' => 'string',
             'teacher_id' => 'integer|exists:teachers,id',
+            'is_sustainabilty'=> 'integer|in:0,1'
         ]);
         
         //Processing

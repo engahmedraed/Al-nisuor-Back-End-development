@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ResearchRepository extends BRepository {
                                                
@@ -24,4 +25,24 @@ class ResearchRepository extends BRepository {
         $model = $this->table->where('id', $id)->where('is_deleted', 0)->get($id);
         return  $model;
     } 
+    public function showBySus($skip, $take, $relations, $filter){
+        $result = QueryBuilder::for($this->table)
+                                ->allowedFilters($filter)
+                                ->allowedSorts(['id']);
+                                if($relations != ''){
+                                    $result = $result->with($relations);
+                                }
+        $result = $result->where('is_deleted', 0)
+                        ->where('is_sustainabilty',1)
+                        ->take($take)
+                        ->skip($skip)
+                        ->orderBy('created_at', 'desc');
+        
+        $resp = [
+            'totalCount' => $result->get()->count(),
+            'items' => $result->get()
+        ];
+        return $resp;
+    
+    }
 }
