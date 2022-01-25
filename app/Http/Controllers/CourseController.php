@@ -208,7 +208,8 @@ class CourseController extends Controller
             'en_name' => 'string',
             'ar_description' => 'string',
             'en_description' => 'string',
-            'image' => 'file|mimes:jpeg,bmp,png,jpg',
+            // 'image' => 'file|mimes:jpeg,bmp,png,jpg',
+            'is_sustainabilty' => 'integer|in:0,1',
             'price' => 'string',
         ]);
         

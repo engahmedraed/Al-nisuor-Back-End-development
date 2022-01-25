@@ -169,6 +169,7 @@ class AboutController extends Controller
         $dataItem =  $response->map(function($item){
             $data['id'] = $item->id;
             $data['name'] = $item->en_name;
+            $data['logo'] = $item->logo;
             if(!empty($item->about)){
                 $data['about'] = [
                     'vision' => $item->about->en_vision,
@@ -188,6 +189,7 @@ class AboutController extends Controller
         elseif($lang == 'ar'){
         $dataItem =  $response->map(function($item){
             $data['id'] = $item->id;
+            $data['logo'] = $item->logo;
             $data['name'] = $item->ar_name;
             if(!empty($item->about)){
                 $data['about'] = [

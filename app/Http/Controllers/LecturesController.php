@@ -100,6 +100,7 @@ class LecturesController extends Controller
             $dataItem =  $response->map(function($item){
                 $data['id'] = $item->id;
                 $data['name'] = $item->en_name;
+                $data['logo'] = $item->logo;
                 $data['stage_id'] = $item->stage_id;
                 $data['created_at'] = $item->created_at;
                 $data['updated_at'] = $item->updated_at;
@@ -120,6 +121,7 @@ class LecturesController extends Controller
             $dataItem =  $response->map(function($item){
                 $data['id'] = $item->id;
                 $data['name'] = $item->ar_name;
+                $data['logo'] = $item->logo;
                 $data['stage_id'] = $item->stage_id;
                 $data['created_at'] = $item->created_at;
                 $data['updated_at'] = $item->updated_at;

@@ -28,7 +28,6 @@ class Collage_agreementsController extends Controller
            'skip' => 'Integer',
            'take' => 'required|Integer'
        ]);
-
         //parameters
         $relations = [];
         $filter = ['ar_title','en_title','en_description','ar_description', 'ar_sub_description', 'en_sub_description'];

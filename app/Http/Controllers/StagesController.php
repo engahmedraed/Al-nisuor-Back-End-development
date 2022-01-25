@@ -152,7 +152,7 @@ class StagesController extends Controller
     //get Stages by department Id
     public function showBydepartmentId(Request $request, $id)
     {
-        $relations = ['stages'];
+        $relations = ['stages','about'];
         $lang = $request->header('Accept-Language');
         // if(!in_array($lang, ['en', 'ar']) && $lang != null){
         //    $lang = 'ar';
@@ -164,6 +164,7 @@ class StagesController extends Controller
         $dataItem =  $response->map(function($item){
             $data['id'] = $item->id;
             $data['name'] = $item->en_name;
+            $data['logo'] = $item->logo;
             $data['link'] = $item->link;
             if(!empty($item->stages)){
                 $data['stages'] =$item->stages
@@ -177,6 +178,13 @@ class StagesController extends Controller
                 }else{
                     $data['stages']=[];
                 }
+                if(!is_null($item->about)){
+                    $data['about'] = [
+                        'vision'=> $item->about->en_vision,
+                        ];
+                    }else{
+                        $data['about']=[];
+                    }
             return $data;
         });
         return Utilities::wrap($dataItem[0] , 200);
@@ -185,7 +193,8 @@ class StagesController extends Controller
         $dataItem =  $response->map(function($item){
             $data['id'] = $item->id;
             $data['name'] = $item->ar_name;
-            $data['link'] = $item->link;
+                $data['logo'] = $item->logo;
+                $data['link'] = $item->link;
             if(!empty($item->stages)){
                 $data['stages'] =$item->stages
                 ->map(function($item){
@@ -198,6 +207,13 @@ class StagesController extends Controller
                 }else{
                     $data['stages']=[];
                 }
+                if(!is_null($item->about)){
+                    $data['about'] = [
+                        'vision'=> $item->about->ar_vision,
+                        ];
+                    }else{
+                        $data['about']=[];
+                    }
             return $data;
         });
         return Utilities::wrap($dataItem[0], 200);
