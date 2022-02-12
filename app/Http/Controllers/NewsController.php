@@ -439,7 +439,7 @@ class NewsController extends Controller
     //add news
     public function store(Request $request)
     {
-        // return response()->json($request->file('images'));
+        // return response()->json(";lmjkhgfd");
 
         //validations 
         $news = $request->validate([
@@ -449,7 +449,7 @@ class NewsController extends Controller
             'en_title' => 'required|string',
             'en_sub_description' => 'string',
             'en_description' => 'string',
-            'image' => 'required|file|mimes:jpeg,bmp,png,jpg',
+            'image' => 'required|file|mimes:jpeg,bmp,png,jpg,JPG',
         ]);
         $tags = $request->validate([
             "tags"    => "nullable|array",
@@ -457,19 +457,25 @@ class NewsController extends Controller
         $images = $request->validate([
           "images"    => "nullable|array",
         ]);
-        $extension =['png','jpeg','jpg'];
+        $extension =['png','jpeg','jpg','JPG'];
         //Processing
         // return response()->json($request);
         $news['user_id'] = auth()->user()->id;
         if($request->hasFile('image')){//check file
             $request->validate([
-                'image' => 'file|mimes:jpeg,bmp,png,jpg'
+                'image' => 'file|mimes:jpeg,bmp,png,jpg,JPG'
             ]);
             $fileName = $request->file('image');
             $new_name = $fileName->store('news');
             $news['image'] = $new_name;
         }
         $response = $this->NewsRepository->create($news);
+        if($request->department_id){
+          $news = News::find($response->id);
+          $news->department_id = $request->department_id;
+          $news->save();
+        }
+        return response()->json(News::find($response->id));
         if (!empty($tags['tags'][0])) {
             foreach ($tags['tags'] as $data) {
                 $tag['name'] = $data;

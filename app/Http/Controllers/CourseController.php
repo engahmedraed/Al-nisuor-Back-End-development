@@ -184,7 +184,7 @@ class CourseController extends Controller
             'en_description' => 'required|string',
             'image' => 'required|file|mimes:jpeg,bmp,png,jpg',
             'price' => 'required|string',
-            'is_sustainabilty' => 'integer|in:0,1'
+            // 'is_sustainabilty' => 'integer|in:0,1'
         ]);
 
         //Processing
