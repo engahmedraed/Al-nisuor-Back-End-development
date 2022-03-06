@@ -475,7 +475,6 @@ class NewsController extends Controller
           $news->department_id = $request->department_id;
           $news->save();
         }
-        return response()->json(News::find($response->id));
         if (!empty($tags['tags'][0])) {
             foreach ($tags['tags'] as $data) {
                 $tag['name'] = $data;
